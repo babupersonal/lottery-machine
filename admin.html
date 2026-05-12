@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>抽獎管理後台</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1b2430;
+      --muted: #627084;
+      --panel: #ffffff;
+      --line: #d9decc;
+      --red: #d94b42;
+      --teal: #147c7d;
+      --gold: #d8a521;
+      --green: #4f7d3f;
+      --shadow: 0 22px 70px rgba(36, 38, 28, .18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 12% 16%, rgba(255, 232, 150, .68), transparent 24rem),
+        radial-gradient(circle at 88% 12%, rgba(95, 181, 166, .34), transparent 26rem),
+        linear-gradient(135deg, #f8f2de 0%, #eef2e5 46%, #d9eee9 100%);
+      color: var(--ink);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      padding: clamp(20px, 4vw, 52px);
+      display: grid;
+      gap: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .back {
+      min-height: 46px;
+      padding: 0 16px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(27, 36, 48, .16);
+      border-radius: 8px;
+      background: rgba(255,255,255,.66);
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 900;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat,
+    .panel {
+      background: rgba(255, 255, 255, .74);
+      border: 1px solid rgba(27, 36, 48, .12);
+      border-radius: 8px;
+      box-shadow: 0 16px 38px rgba(48, 58, 44, .12);
+      backdrop-filter: blur(14px);
+    }
+
+    .stat {
+      min-height: 112px;
+      padding: 18px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .stat strong {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+
+    .panel {
+      padding: clamp(18px, 3vw, 28px);
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .fields {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 14px 1fr 140px;
+      gap: 14px;
+      align-items: center;
+      min-height: 58px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(27, 36, 48, .09);
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    label {
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid rgba(27, 36, 48, .18);
+      border-radius: 8px;
+      padding: 8px 12px;
+      text-align: right;
+      font-weight: 900;
+      background: white;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .actions button {
+      min-height: 52px;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .save {
+      background: linear-gradient(180deg, #1c8d86, #116c70);
+      color: white;
+      box-shadow: 0 14px 28px rgba(17, 108, 112, .22);
+    }
+
+    .clear {
+      background: #fff3d2;
+      color: var(--ink);
+      border: 1px solid rgba(27, 36, 48, .12);
+    }
+
+    .restore {
+      background: #efe7cf;
+      color: var(--ink);
+      border: 1px solid rgba(27, 36, 48, .12);
+    }
+
+    .history {
+      max-height: 250px;
+      overflow: auto;
+      margin-top: 12px;
+    }
+
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(27, 36, 48, .08);
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    .history-row strong {
+      color: var(--ink);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(18px);
+      opacity: 0;
+      min-width: 180px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #1b2430;
+      color: white;
+      text-align: center;
+      font-weight: 900;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .summary,
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        grid-template-columns: 14px 1fr;
+      }
+
+      .row input {
+        grid-column: 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <h1>抽獎管理後台</h1>
+      <a class="back" href="index.html">回抽獎頁</a>
+    </header>
+
+    <section class="summary" aria-label="抽獎狀態">
+      <div class="stat">
+        <span>目前剩餘</span>
+        <strong id="runtimeTotal">0</strong>
+      </div>
+      <div class="stat">
+        <span>後台設定總量</span>
+        <strong id="configTotal">0</strong>
+      </div>
+      <div class="stat">
+        <span>抽獎紀錄</span>
+        <strong id="historyTotal">0</strong>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>獎項數量</h2>
+      </div>
+      <p class="hint">修改數量後按「儲存並重置抽獎」，抽獎頁會用新的數量重新開始。</p>
+
+      <form id="adminForm">
+        <div class="fields" id="fields"></div>
+        <div class="actions">
+          <button class="save" type="submit">儲存並重置抽獎</button>
+          <button class="clear" id="clearHistoryBtn" type="button">清空紀錄</button>
+          <button class="restore" id="restoreDefaultBtn" type="button">恢復預設數量</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="historyTitle">
+      <div class="panel-head">
+        <h2 id="historyTitle">抽獎紀錄</h2>
+      </div>
+      <div class="history" id="history"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">已儲存</div>
+
+  <script>
+    const defaultPrizes = [
+      { name: "超商禮物卡 100元", count: 40, color: "#d94b42" },
+      { name: "超商禮物卡 50元", count: 60, color: "#d8a521" },
+      { name: "職探任意門 紗網零錢包", count: 60, color: "#147c7d" },
+      { name: "技職永續破風者 手機吊繩", count: 240, color: "#4f7d3f" },
+      { name: "銘謝惠顧", count: 400, color: "#627084" }
+    ];
+
+    const CONFIG_STORAGE_KEY = "lotteryPrizeConfig";
+    const STATE_STORAGE_KEY = "lotteryRuntimeState";
+
+    const fields = document.querySelector("#fields");
+    const form = document.querySelector("#adminForm");
+    const history = document.querySelector("#history");
+    const runtimeTotal = document.querySelector("#runtimeTotal");
+    const configTotal = document.querySelector("#configTotal");
+    const historyTotal = document.querySelector("#historyTotal");
+    const clearHistoryBtn = document.querySelector("#clearHistoryBtn");
+    const restoreDefaultBtn = document.querySelector("#restoreDefaultBtn");
+    const toast = document.querySelector("#toast");
+
+    function clonePrizes(prizes) {
+      return prizes.map((prize) => ({ ...prize }));
+    }
+
+    function normalizePrizes(prizes) {
+      return defaultPrizes.map((defaultPrize, index) => {
+        const savedPrize = prizes[index] || {};
+        const count = Number.parseInt(savedPrize.count, 10);
+        return {
+          ...defaultPrize,
+          count: Number.isFinite(count) && count >= 0 ? count : defaultPrize.count
+        };
+      });
+    }
+
+    function loadConfiguredPrizes() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(CONFIG_STORAGE_KEY));
+        return Array.isArray(saved) ? normalizePrizes(saved) : clonePrizes(defaultPrizes);
+      } catch {
+        return clonePrizes(defaultPrizes);
+      }
+    }
+
+    function loadRuntimeState(configuredPrizes) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STATE_STORAGE_KEY));
+        const namesMatch = Array.isArray(saved?.prizes)
+          && saved.prizes.length === configuredPrizes.length
+          && saved.prizes.every((prize, index) => prize.name === configuredPrizes[index].name);
+
+        if (namesMatch) {
+          return {
+            prizes: normalizePrizes(saved.prizes),
+            history: Array.isArray(saved.history) ? saved.history : []
+          };
+        }
+      } catch {
+        return { prizes: clonePrizes(configuredPrizes), history: [] };
+      }
+
+      return { prizes: clonePrizes(configuredPrizes), history: [] };
+    }
+
+    function saveConfiguredPrizes(prizes) {
+      try {
+        localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(prizes));
+      } catch {
+        showToast("瀏覽器未允許儲存設定");
+      }
+    }
+
+    function saveRuntimeState(runtimeState) {
+      try {
+        localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(runtimeState));
+      } catch {
+        showToast("瀏覽器未允許儲存狀態");
+      }
+    }
+
+    function sumCounts(prizes) {
+      return prizes.reduce((sum, prize) => sum + prize.count, 0);
+    }
+
+    let configuredPrizes = loadConfiguredPrizes();
+    let runtimeState = loadRuntimeState(configuredPrizes);
+
+    function renderFields() {
+      fields.innerHTML = configuredPrizes.map((prize, index) => `
+        <div class="row">
+          <span class="dot" style="background:${prize.color}"></span>
+          <label for="prizeCount${index}">【${prize.name}】</label>
+          <input id="prizeCount${index}" name="prizeCount${index}" type="number" min="0" step="1" value="${prize.count}" inputmode="numeric">
+        </div>
+      `).join("");
+    }
+
+    function renderHistory() {
+      history.innerHTML = runtimeState.history.length
+        ? runtimeState.history.map((item, index) => `
+            <div class="history-row">
+              <span>#${runtimeState.history.length - index}</span>
+              <strong>【${item.name}】</strong>
+            </div>
+          `).join("")
+        : `<div class="history-row"><span>尚無紀錄</span><strong></strong></div>`;
+    }
+
+    function renderSummary() {
+      runtimeTotal.textContent = sumCounts(runtimeState.prizes);
+      configTotal.textContent = sumCounts(configuredPrizes);
+      historyTotal.textContent = runtimeState.history.length;
+    }
+
+    function render() {
+      renderFields();
+      renderHistory();
+      renderSummary();
+    }
+
+    function readFormPrizes() {
+      return configuredPrizes.map((prize, index) => {
+        const input = form.elements[`prizeCount${index}`];
+        const count = Number.parseInt(input.value, 10);
+        return {
+          ...prize,
+          count: Number.isFinite(count) && count >= 0 ? count : 0
+        };
+      });
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 1700);
+    }
+
+    function saveAndReset(event) {
+      event.preventDefault();
+      configuredPrizes = readFormPrizes();
+      runtimeState = {
+        prizes: clonePrizes(configuredPrizes),
+        history: []
+      };
+      saveConfiguredPrizes(configuredPrizes);
+      saveRuntimeState(runtimeState);
+      render();
+      showToast("已儲存並重置");
+    }
+
+    function clearHistory() {
+      if (!confirm("確定要清空抽獎紀錄？目前剩餘數量不會改變。")) return;
+      runtimeState.history = [];
+      saveRuntimeState(runtimeState);
+      render();
+      showToast("紀錄已清空");
+    }
+
+    function restoreDefault() {
+      if (!confirm("確定要恢復預設數量並清空紀錄？")) return;
+      configuredPrizes = clonePrizes(defaultPrizes);
+      runtimeState = {
+        prizes: clonePrizes(configuredPrizes),
+        history: []
+      };
+      saveConfiguredPrizes(configuredPrizes);
+      saveRuntimeState(runtimeState);
+      render();
+      showToast("已恢復預設");
+    }
+
+    form.addEventListener("submit", saveAndReset);
+    clearHistoryBtn.addEventListener("click", clearHistory);
+    restoreDefaultBtn.addEventListener("click", restoreDefault);
+
+    render();
+  </script>
+</body>
+</html>

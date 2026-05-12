@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>抽獎機器</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1b2430;
+      --muted: #627084;
+      --panel: #ffffff;
+      --panel-soft: #f7f4ea;
+      --line: #d9decc;
+      --red: #d94b42;
+      --teal: #147c7d;
+      --gold: #d8a521;
+      --green: #4f7d3f;
+      --shadow: 0 22px 70px rgba(36, 38, 28, .18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(255, 232, 150, .75), transparent 24rem),
+        radial-gradient(circle at 86% 18%, rgba(95, 181, 166, .34), transparent 26rem),
+        linear-gradient(135deg, #f8f2de 0%, #eef2e5 46%, #d9eee9 100%);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .stage {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(320px, 1fr) minmax(300px, 420px);
+      gap: clamp(16px, 2.5vw, 34px);
+      align-items: center;
+      padding: clamp(14px, 3vw, 34px);
+      position: relative;
+    }
+
+    .machine-wrap {
+      display: grid;
+      justify-items: center;
+      gap: 14px;
+    }
+
+    .brand {
+      width: min(100%, 760px);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4.4vw, 4rem);
+      line-height: .95;
+      letter-spacing: 0;
+    }
+
+    .count {
+      min-width: 128px;
+      padding: 10px 14px;
+      border: 1px solid rgba(27, 36, 48, .12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .62);
+      backdrop-filter: blur(10px);
+      text-align: right;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .count strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1.65rem;
+      line-height: 1;
+    }
+
+    .machine {
+      width: min(88vw, 460px);
+      aspect-ratio: 5 / 5.25;
+      position: relative;
+      filter: drop-shadow(var(--shadow));
+    }
+
+    .dome {
+      position: absolute;
+      inset: 3% 9% 34%;
+      border-radius: 50% 50% 42% 42%;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.88), rgba(255,255,255,.22) 35%, rgba(255,255,255,.08)),
+        radial-gradient(circle at 50% 72%, rgba(255,255,255,.4), transparent 38%),
+        rgba(206, 238, 232, .56);
+      border: 10px solid #f9fff9;
+      box-shadow: inset 0 -18px 34px rgba(19, 103, 103, .16), inset 0 14px 28px rgba(255,255,255,.7);
+      overflow: hidden;
+    }
+
+    .capsule {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      box-shadow: inset -8px -10px 0 rgba(0,0,0,.08), inset 8px 7px 0 rgba(255,255,255,.45);
+      animation: float 4.8s ease-in-out infinite;
+    }
+
+    .capsule::after {
+      content: "";
+      position: absolute;
+      inset: 27px 3px auto;
+      height: 4px;
+      background: rgba(255,255,255,.65);
+      border-radius: 4px;
+    }
+
+    .c1 { left: 11%; top: 56%; background: #f15b4a; animation-delay: -.9s; }
+    .c2 { left: 26%; top: 44%; background: #f0bd2d; animation-delay: -2s; }
+    .c3 { left: 43%; top: 59%; background: #49a36f; animation-delay: -1.3s; }
+    .c4 { left: 60%; top: 39%; background: #2787a7; animation-delay: -3.5s; }
+    .c5 { left: 70%; top: 58%; background: #e876a5; animation-delay: -2.7s; }
+    .c6 { left: 37%; top: 31%; background: #7a63bd; animation-delay: -4.1s; }
+
+    .body {
+      position: absolute;
+      inset: 49% 4% 7%;
+      border-radius: 34px 34px 22px 22px;
+      background: linear-gradient(145deg, #f35a4f, #c93334);
+      border: 10px solid #8c2630;
+      box-shadow: inset 0 18px 0 rgba(255,255,255,.22), inset 0 -16px 0 rgba(72,15,21,.18);
+    }
+
+    .display {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      top: 56%;
+      min-height: 76px;
+      display: grid;
+      place-items: center;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #fff8d8;
+      border: 7px solid #80252e;
+      box-shadow: inset 0 4px 0 rgba(255,255,255,.75);
+      text-align: center;
+      font-weight: 900;
+      font-size: clamp(1.15rem, 2.4vw, 1.7rem);
+      line-height: 1.22;
+    }
+
+    .slot {
+      position: absolute;
+      left: 22%;
+      right: 22%;
+      bottom: 13%;
+      height: 36px;
+      border-radius: 999px;
+      background: #5a1721;
+      border: 5px solid rgba(255,255,255,.16);
+    }
+
+    .knob {
+      position: absolute;
+      right: 10%;
+      bottom: 18%;
+      width: clamp(66px, 11vw, 92px);
+      aspect-ratio: 1;
+      border: 8px solid #7a202a;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 32%, #fff0a9 0 14%, #d9a51f 15% 62%, #916013 63% 100%);
+      box-shadow: inset -10px -12px 0 rgba(67,39,0,.18);
+      transition: transform .35s ease;
+    }
+
+    .machine.spinning .knob {
+      transform: rotate(360deg);
+    }
+
+    .tray {
+      position: absolute;
+      left: 30%;
+      right: 30%;
+      bottom: 4%;
+      height: 42px;
+      border-radius: 0 0 42px 42px;
+      background: #f8f1dc;
+      border: 7px solid #8c2630;
+      border-top: 0;
+    }
+
+    .launch {
+      width: min(100%, 420px);
+      height: 56px;
+      border: 0;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #1c8d86, #116c70);
+      color: white;
+      cursor: pointer;
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 0;
+      box-shadow: 0 14px 28px rgba(17, 108, 112, .28);
+      transition: transform .16s ease, filter .16s ease;
+    }
+
+    .launch:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+    }
+
+    .launch:active {
+      transform: translateY(1px);
+    }
+
+    .launch:disabled {
+      cursor: not-allowed;
+      filter: grayscale(.4);
+      opacity: .72;
+      transform: none;
+    }
+
+    .side {
+      display: grid;
+      gap: 12px;
+      align-content: center;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, .72);
+      border: 1px solid rgba(27, 36, 48, .12);
+      border-radius: 8px;
+      box-shadow: 0 16px 38px rgba(48, 58, 44, .12);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+    }
+
+    .panel h2 {
+      margin: 0;
+      padding: 14px 18px 8px;
+      font-size: 1.05rem;
+    }
+
+    .prizes {
+      display: grid;
+      margin: 0;
+      padding: 0 18px 14px;
+      list-style: none;
+      gap: 6px;
+    }
+
+    .prize {
+      display: grid;
+      grid-template-columns: 12px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      min-height: 42px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(27, 36, 48, .08);
+    }
+
+    .prize:last-child {
+      border-bottom: 0;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    .name {
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .stock {
+      min-width: 60px;
+      color: var(--muted);
+      text-align: right;
+      font-weight: 800;
+    }
+
+    .history {
+      max-height: 170px;
+      overflow: auto;
+      padding: 0 18px 14px;
+    }
+
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(27, 36, 48, .08);
+      color: var(--muted);
+      font-size: .94rem;
+    }
+
+    .history-row strong {
+      color: var(--ink);
+    }
+
+    .tools {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .tool {
+      min-height: 48px;
+      border: 1px solid rgba(27, 36, 48, .16);
+      border-radius: 8px;
+      background: rgba(255,255,255,.62);
+      color: var(--ink);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .result-pop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 22px;
+      background: rgba(15, 22, 27, .36);
+      z-index: 10;
+    }
+
+    .result-pop.show {
+      display: grid;
+    }
+
+    .result-card {
+      width: min(92vw, 560px);
+      border-radius: 8px;
+      background: #fffdf6;
+      border: 1px solid rgba(27,36,48,.12);
+      box-shadow: var(--shadow);
+      padding: clamp(24px, 5vw, 46px);
+      text-align: center;
+      transform: scale(.96);
+      animation: pop .28s ease forwards;
+    }
+
+    .result-card p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .result-card h3 {
+      margin: 0 0 24px;
+      font-size: clamp(2rem, 7vw, 4rem);
+      line-height: 1.12;
+    }
+
+    .result-card button {
+      min-width: 160px;
+      height: 52px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--red);
+      color: white;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .confetti {
+      position: fixed;
+      top: -18px;
+      width: 10px;
+      height: 16px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 12;
+      animation: fall linear forwards;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(-8deg); }
+      50% { transform: translateY(-16px) rotate(10deg); }
+    }
+
+    @keyframes pop {
+      to { transform: scale(1); }
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(108vh) rotate(720deg);
+        opacity: .1;
+      }
+    }
+
+    @media (max-width: 880px) {
+      .stage {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .side {
+        align-content: start;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .stage {
+        padding: 18px;
+      }
+
+      .brand {
+        align-items: flex-start;
+      }
+
+      .count {
+        min-width: 104px;
+      }
+
+      .display {
+        min-height: 76px;
+        padding: 12px;
+        border-width: 5px;
+      }
+
+      .tools {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+    @media (min-width: 881px) and (max-height: 820px) {
+      .stage {
+        padding-top: 14px;
+        padding-bottom: 14px;
+      }
+
+      .machine {
+        width: min(84vw, 410px);
+      }
+
+      h1 {
+        font-size: clamp(1.9rem, 4vw, 3.4rem);
+      }
+
+      .count {
+        padding: 8px 12px;
+      }
+
+      .count strong {
+        font-size: 1.45rem;
+      }
+
+      .launch {
+        height: 52px;
+      }
+
+      .history {
+        max-height: 130px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <section class="machine-wrap" aria-label="抽獎機器">
+      <div class="brand">
+        <h1>抽獎機器</h1>
+        <div class="count">
+          剩餘
+          <strong id="totalLeft">800</strong>
+        </div>
+      </div>
+
+      <div class="machine" id="machine">
+        <div class="dome" aria-hidden="true">
+          <span class="capsule c1"></span>
+          <span class="capsule c2"></span>
+          <span class="capsule c3"></span>
+          <span class="capsule c4"></span>
+          <span class="capsule c5"></span>
+          <span class="capsule c6"></span>
+        </div>
+        <div class="body"></div>
+        <div class="display" id="display">準備抽獎</div>
+        <div class="slot"></div>
+        <div class="knob"></div>
+        <div class="tray"></div>
+      </div>
+
+      <button class="launch" id="drawBtn" type="button">開始抽獎</button>
+    </section>
+
+    <aside class="side">
+      <section class="panel" aria-labelledby="prizeTitle">
+        <h2 id="prizeTitle">獎項庫存</h2>
+        <ul class="prizes" id="prizeList"></ul>
+      </section>
+
+      <section class="panel" aria-labelledby="historyTitle">
+        <h2 id="historyTitle">抽獎紀錄</h2>
+        <div class="history" id="history"></div>
+      </section>
+
+      <div class="tools">
+        <button class="tool" id="resetBtn" type="button">重置抽獎</button>
+        <a class="tool" href="admin.html">管理後台</a>
+        <button class="tool" id="exportBtn" type="button">下載紀錄</button>
+      </div>
+    </aside>
+  </main>
+
+  <div class="result-pop" id="resultPop" role="dialog" aria-modal="true" aria-labelledby="resultText">
+    <div class="result-card">
+      <p>抽中</p>
+      <h3 id="resultText">獎項</h3>
+      <button type="button" id="closePop">完成</button>
+    </div>
+  </div>
+
+  <script>
+    const defaultPrizes = [
+      { name: "超商禮物卡 100元", count: 40, color: "#d94b42" },
+      { name: "超商禮物卡 50元", count: 60, color: "#d8a521" },
+      { name: "職探任意門 紗網零錢包", count: 60, color: "#147c7d" },
+      { name: "技職永續破風者 手機吊繩", count: 240, color: "#4f7d3f" },
+      { name: "銘謝惠顧", count: 400, color: "#627084" }
+    ];
+
+    const CONFIG_STORAGE_KEY = "lotteryPrizeConfig";
+    const STATE_STORAGE_KEY = "lotteryRuntimeState";
+
+    function clonePrizes(prizes) {
+      return prizes.map((prize) => ({ ...prize }));
+    }
+
+    function normalizePrizes(prizes) {
+      return defaultPrizes.map((defaultPrize, index) => {
+        const savedPrize = prizes[index] || {};
+        const count = Number.parseInt(savedPrize.count, 10);
+        return {
+          ...defaultPrize,
+          count: Number.isFinite(count) && count >= 0 ? count : defaultPrize.count
+        };
+      });
+    }
+
+    function loadConfiguredPrizes() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(CONFIG_STORAGE_KEY));
+        return Array.isArray(saved) ? normalizePrizes(saved) : clonePrizes(defaultPrizes);
+      } catch {
+        return clonePrizes(defaultPrizes);
+      }
+    }
+
+    function saveConfiguredPrizes(prizes) {
+      try {
+        localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(prizes));
+      } catch {
+        // The page still works if the browser blocks local file storage.
+      }
+    }
+
+    function loadRuntimeState(configuredPrizes) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STATE_STORAGE_KEY));
+        const namesMatch = Array.isArray(saved?.prizes)
+          && saved.prizes.length === configuredPrizes.length
+          && saved.prizes.every((prize, index) => prize.name === configuredPrizes[index].name);
+
+        if (namesMatch) {
+          return {
+            prizes: normalizePrizes(saved.prizes),
+            history: Array.isArray(saved.history) ? saved.history : []
+          };
+        }
+      } catch {
+        return { prizes: clonePrizes(configuredPrizes), history: [] };
+      }
+
+      return { prizes: clonePrizes(configuredPrizes), history: [] };
+    }
+
+    function saveRuntimeState() {
+      try {
+        localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify({
+          prizes: state.prizes,
+          history: state.history
+        }));
+      } catch {
+        // The page still works if the browser blocks local file storage.
+      }
+    }
+
+    let configuredPrizes = loadConfiguredPrizes();
+    const savedState = loadRuntimeState(configuredPrizes);
+
+    const state = {
+      prizes: savedState.prizes,
+      history: savedState.history,
+      drawing: false
+    };
+
+    const machine = document.querySelector("#machine");
+    const display = document.querySelector("#display");
+    const drawBtn = document.querySelector("#drawBtn");
+    const resetBtn = document.querySelector("#resetBtn");
+    const exportBtn = document.querySelector("#exportBtn");
+    const prizeList = document.querySelector("#prizeList");
+    const history = document.querySelector("#history");
+    const totalLeft = document.querySelector("#totalLeft");
+    const resultPop = document.querySelector("#resultPop");
+    const resultText = document.querySelector("#resultText");
+    const closePop = document.querySelector("#closePop");
+
+    function getTotalLeft() {
+      return state.prizes.reduce((sum, prize) => sum + prize.count, 0);
+    }
+
+    function drawPrize() {
+      const total = getTotalLeft();
+      if (total <= 0) return null;
+
+      let ticket = Math.floor(Math.random() * total);
+      for (const prize of state.prizes) {
+        if (ticket < prize.count) {
+          prize.count -= 1;
+          return prize;
+        }
+        ticket -= prize.count;
+      }
+      return null;
+    }
+
+    function render() {
+      const total = getTotalLeft();
+      totalLeft.textContent = total;
+      drawBtn.disabled = state.drawing || total === 0;
+      drawBtn.textContent = total === 0 ? "已抽完" : state.drawing ? "抽獎中" : "開始抽獎";
+
+      prizeList.innerHTML = state.prizes.map((prize) => `
+        <li class="prize">
+          <span class="dot" style="background:${prize.color}"></span>
+          <span class="name">【${prize.name}】</span>
+          <span class="stock">${prize.count} 份</span>
+        </li>
+      `).join("");
+
+      history.innerHTML = state.history.length
+        ? state.history.map((item, index) => `
+            <div class="history-row">
+              <span>#${state.history.length - index}</span>
+              <strong>【${item.name}】</strong>
+            </div>
+          `).join("")
+        : `<div class="history-row"><span>尚無紀錄</span><strong></strong></div>`;
+    }
+
+    function showResult(prize) {
+      resultText.textContent = `【${prize.name}】`;
+      resultPop.classList.add("show");
+      closePop.focus();
+      if (prize.name !== "銘謝惠顧") {
+        launchConfetti();
+      }
+    }
+
+    function launchConfetti() {
+      const colors = ["#d94b42", "#d8a521", "#147c7d", "#4f7d3f", "#e876a5", "#7a63bd"];
+      for (let i = 0; i < 80; i += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDuration = `${1.8 + Math.random() * 1.6}s`;
+        piece.style.animationDelay = `${Math.random() * .35}s`;
+        document.body.append(piece);
+        piece.addEventListener("animationend", () => piece.remove());
+      }
+    }
+
+    function startDraw() {
+      if (state.drawing || getTotalLeft() === 0) return;
+
+      state.drawing = true;
+      machine.classList.add("spinning");
+      render();
+
+      const rollingNames = state.prizes.map((prize) => `【${prize.name}】`);
+      let tick = 0;
+      const roller = window.setInterval(() => {
+        display.textContent = rollingNames[tick % rollingNames.length];
+        tick += 1;
+      }, 92);
+
+      window.setTimeout(() => {
+        window.clearInterval(roller);
+        const prize = drawPrize();
+        state.drawing = false;
+        machine.classList.remove("spinning");
+
+        if (!prize) {
+          display.textContent = "已抽完";
+          render();
+          return;
+        }
+
+        state.history.unshift({ name: prize.name, time: new Date().toISOString() });
+        display.textContent = `【${prize.name}】`;
+        saveRuntimeState();
+        render();
+        showResult(prize);
+      }, 1700);
+    }
+
+    function resetDraw() {
+      if (!confirm("確定要重置所有庫存與紀錄？")) return;
+      state.prizes = clonePrizes(configuredPrizes);
+      state.history = [];
+      display.textContent = "準備抽獎";
+      saveRuntimeState();
+      render();
+    }
+
+    function exportHistory() {
+      const rows = [["序號", "獎項", "時間"]];
+      state.history.slice().reverse().forEach((item, index) => {
+        rows.push([index + 1, item.name, item.time]);
+      });
+      const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+      const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "抽獎紀錄.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    drawBtn.addEventListener("click", startDraw);
+    resetBtn.addEventListener("click", resetDraw);
+    exportBtn.addEventListener("click", exportHistory);
+    closePop.addEventListener("click", () => resultPop.classList.remove("show"));
+    resultPop.addEventListener("click", (event) => {
+      if (event.target === resultPop) resultPop.classList.remove("show");
+    });
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") resultPop.classList.remove("show");
+      if (event.code === "Space" && !resultPop.classList.contains("show")) {
+        event.preventDefault();
+        startDraw();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
