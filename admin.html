@@ -210,6 +210,38 @@
       margin-top: 12px;
     }
 
+    .stock-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stock-row {
+      display: grid;
+      grid-template-columns: 14px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      min-height: 48px;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(27, 36, 48, .08);
+    }
+
+    .stock-row:last-child {
+      border-bottom: 0;
+    }
+
+    .stock-name {
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    .stock-count {
+      min-width: 72px;
+      color: var(--muted);
+      text-align: right;
+      font-weight: 900;
+    }
+
     .history-row {
       display: flex;
       justify-content: space-between;
@@ -264,6 +296,15 @@
       .row input {
         grid-column: 2;
       }
+
+      .stock-row {
+        grid-template-columns: 14px 1fr;
+      }
+
+      .stock-count {
+        grid-column: 2;
+        text-align: left;
+      }
     }
   </style>
 </head>
@@ -305,6 +346,13 @@
       </form>
     </section>
 
+    <section class="panel" aria-labelledby="stockTitle">
+      <div class="panel-head">
+        <h2 id="stockTitle">剩餘庫存明細</h2>
+      </div>
+      <div class="stock-list" id="stockList"></div>
+    </section>
+
     <section class="panel" aria-labelledby="historyTitle">
       <div class="panel-head">
         <h2 id="historyTitle">抽獎紀錄</h2>
@@ -321,7 +369,7 @@
       { name: "超商禮物卡 50元", count: 60, color: "#d8a521" },
       { name: "職探任意門 紗網零錢包", count: 60, color: "#147c7d" },
       { name: "技職永續破風者 手機吊繩", count: 240, color: "#4f7d3f" },
-      { name: "銘謝惠顧", count: 400, color: "#627084" }
+      { name: "銘謝惠顧", count: 200, color: "#627084" }
     ];
 
     const CONFIG_STORAGE_KEY = "lotteryPrizeConfig";
@@ -330,6 +378,7 @@
     const fields = document.querySelector("#fields");
     const form = document.querySelector("#adminForm");
     const history = document.querySelector("#history");
+    const stockList = document.querySelector("#stockList");
     const runtimeTotal = document.querySelector("#runtimeTotal");
     const configTotal = document.querySelector("#configTotal");
     const historyTotal = document.querySelector("#historyTotal");
@@ -425,6 +474,16 @@
         : `<div class="history-row"><span>尚無紀錄</span><strong></strong></div>`;
     }
 
+    function renderStockList() {
+      stockList.innerHTML = runtimeState.prizes.map((prize) => `
+        <div class="stock-row">
+          <span class="dot" style="background:${prize.color}"></span>
+          <span class="stock-name">【${prize.name}】</span>
+          <span class="stock-count">${prize.count} 份</span>
+        </div>
+      `).join("");
+    }
+
     function renderSummary() {
       runtimeTotal.textContent = sumCounts(runtimeState.prizes);
       configTotal.textContent = sumCounts(configuredPrizes);
@@ -433,6 +492,7 @@
 
     function render() {
       renderFields();
+      renderStockList();
       renderHistory();
       renderSummary();
     }

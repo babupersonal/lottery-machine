@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -23,6 +24,11 @@
       box-sizing: border-box;
     }
 
+    html {
+      min-height: 100%;
+      overflow-y: auto;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -33,6 +39,7 @@
         linear-gradient(135deg, #f8f2de 0%, #eef2e5 46%, #d9eee9 100%);
       color: var(--ink);
       overflow-x: hidden;
+      overflow-y: auto;
     }
 
     button,
@@ -41,7 +48,8 @@
     }
 
     .stage {
-      min-height: 100vh;
+      min-height: 100%;
+      min-height: 100dvh;
       display: grid;
       grid-template-columns: minmax(320px, 1fr) minmax(300px, 420px);
       gap: clamp(16px, 2.5vw, 34px);
@@ -99,14 +107,14 @@
 
     .dome {
       position: absolute;
-      inset: 3% 9% 34%;
+      inset: 3% 9% 39%;
       border-radius: 50% 50% 42% 42%;
       background:
-        linear-gradient(145deg, rgba(255,255,255,.88), rgba(255,255,255,.22) 35%, rgba(255,255,255,.08)),
-        radial-gradient(circle at 50% 72%, rgba(255,255,255,.4), transparent 38%),
+        linear-gradient(145deg, rgba(255, 255, 255, .88), rgba(255, 255, 255, .22) 35%, rgba(255, 255, 255, .08)),
+        radial-gradient(circle at 50% 72%, rgba(255, 255, 255, .4), transparent 38%),
         rgba(206, 238, 232, .56);
       border: 10px solid #f9fff9;
-      box-shadow: inset 0 -18px 34px rgba(19, 103, 103, .16), inset 0 14px 28px rgba(255,255,255,.7);
+      box-shadow: inset 0 -18px 34px rgba(19, 103, 103, .16), inset 0 14px 28px rgba(255, 255, 255, .7);
       overflow: hidden;
     }
 
@@ -115,7 +123,7 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      box-shadow: inset -8px -10px 0 rgba(0,0,0,.08), inset 8px 7px 0 rgba(255,255,255,.45);
+      box-shadow: inset -8px -10px 0 rgba(0, 0, 0, .08), inset 8px 7px 0 rgba(255, 255, 255, .45);
       animation: float 4.8s ease-in-out infinite;
     }
 
@@ -124,24 +132,60 @@
       position: absolute;
       inset: 27px 3px auto;
       height: 4px;
-      background: rgba(255,255,255,.65);
+      background: rgba(255, 255, 255, .65);
       border-radius: 4px;
     }
 
-    .c1 { left: 11%; top: 56%; background: #f15b4a; animation-delay: -.9s; }
-    .c2 { left: 26%; top: 44%; background: #f0bd2d; animation-delay: -2s; }
-    .c3 { left: 43%; top: 59%; background: #49a36f; animation-delay: -1.3s; }
-    .c4 { left: 60%; top: 39%; background: #2787a7; animation-delay: -3.5s; }
-    .c5 { left: 70%; top: 58%; background: #e876a5; animation-delay: -2.7s; }
-    .c6 { left: 37%; top: 31%; background: #7a63bd; animation-delay: -4.1s; }
+    .c1 {
+      left: 11%;
+      top: 56%;
+      background: #f15b4a;
+      animation-delay: -.9s;
+    }
+
+    .c2 {
+      left: 26%;
+      top: 44%;
+      background: #f0bd2d;
+      animation-delay: -2s;
+    }
+
+    .c3 {
+      left: 43%;
+      top: 52%;
+      background: #49a36f;
+      animation-delay: -1.3s;
+    }
+
+    .c4 {
+      left: 60%;
+      top: 39%;
+      background: #2787a7;
+      animation-delay: -3.5s;
+    }
+
+    .c5 {
+      left: 70%;
+      top: 52%;
+      background: #e876a5;
+      animation-delay: -2.7s;
+    }
+
+    .c6 {
+      left: 37%;
+      top: 31%;
+      background: #7a63bd;
+      animation-delay: -4.1s;
+    }
 
     .body {
       position: absolute;
       inset: 49% 4% 7%;
+      z-index: 1;
       border-radius: 34px 34px 22px 22px;
       background: linear-gradient(145deg, #f35a4f, #c93334);
       border: 10px solid #8c2630;
-      box-shadow: inset 0 18px 0 rgba(255,255,255,.22), inset 0 -16px 0 rgba(72,15,21,.18);
+      box-shadow: inset 0 18px 0 rgba(255, 255, 255, .22), inset 0 -16px 0 rgba(72, 15, 21, .18);
     }
 
     .display {
@@ -149,18 +193,19 @@
       left: 10%;
       right: 10%;
       top: 56%;
-      min-height: 76px;
+      min-height: 110px;
+      padding: 12px 12px 12px 12px;
       display: grid;
       place-items: center;
-      padding: 12px 14px;
       border-radius: 8px;
       background: #fff8d8;
       border: 7px solid #80252e;
-      box-shadow: inset 0 4px 0 rgba(255,255,255,.75);
+      box-shadow: inset 0 4px 0 rgba(255, 255, 255, .75);
       text-align: center;
       font-weight: 900;
       font-size: clamp(1.15rem, 2.4vw, 1.7rem);
       line-height: 1.22;
+      z-index: 2;
     }
 
     .slot {
@@ -171,20 +216,22 @@
       height: 36px;
       border-radius: 999px;
       background: #5a1721;
-      border: 5px solid rgba(255,255,255,.16);
+      border: 5px solid rgba(255, 255, 255, .16);
+      z-index: 2;
     }
 
     .knob {
       position: absolute;
-      right: 10%;
-      bottom: 18%;
+      right: -6%;
+      bottom: 10%;
       width: clamp(66px, 11vw, 92px);
       aspect-ratio: 1;
       border: 8px solid #7a202a;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 32%, #fff0a9 0 14%, #d9a51f 15% 62%, #916013 63% 100%);
-      box-shadow: inset -10px -12px 0 rgba(67,39,0,.18);
+      box-shadow: inset -10px -12px 0 rgba(67, 39, 0, .18);
       transition: transform .35s ease;
+      z-index: 3;
     }
 
     .machine.spinning .knob {
@@ -201,6 +248,7 @@
       background: #f8f1dc;
       border: 7px solid #8c2630;
       border-top: 0;
+      z-index: 2;
     }
 
     .launch {
@@ -326,7 +374,7 @@
       min-height: 48px;
       border: 1px solid rgba(27, 36, 48, .16);
       border-radius: 8px;
-      background: rgba(255,255,255,.62);
+      background: rgba(255, 255, 255, .62);
       color: var(--ink);
       cursor: pointer;
       display: grid;
@@ -353,7 +401,7 @@
       width: min(92vw, 560px);
       border-radius: 8px;
       background: #fffdf6;
-      border: 1px solid rgba(27,36,48,.12);
+      border: 1px solid rgba(27, 36, 48, .12);
       box-shadow: var(--shadow);
       padding: clamp(24px, 5vw, 46px);
       text-align: center;
@@ -396,12 +444,21 @@
     }
 
     @keyframes float {
-      0%, 100% { transform: translateY(0) rotate(-8deg); }
-      50% { transform: translateY(-16px) rotate(10deg); }
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(-8deg);
+      }
+
+      50% {
+        transform: translateY(-10px) rotate(10deg);
+      }
     }
 
     @keyframes pop {
-      to { transform: scale(1); }
+      to {
+        transform: scale(1);
+      }
     }
 
     @keyframes fall {
@@ -415,6 +472,9 @@
       .stage {
         grid-template-columns: 1fr;
         align-items: start;
+        min-height: auto;
+        padding-top: 18px;
+        padding-bottom: 28px;
       }
 
       .side {
@@ -436,8 +496,8 @@
       }
 
       .display {
-        min-height: 76px;
-        padding: 12px;
+        min-height: 100px;
+        padding: 12px 12px 12px 12px;
         border-width: 5px;
       }
 
@@ -479,6 +539,7 @@
     }
   </style>
 </head>
+
 <body>
   <main class="stage">
     <section class="machine-wrap" aria-label="抽獎機器">
@@ -486,7 +547,7 @@
         <h1>抽獎機器</h1>
         <div class="count">
           剩餘
-          <strong id="totalLeft">800</strong>
+          <strong id="totalLeft">600</strong>
         </div>
       </div>
 
@@ -511,7 +572,7 @@
 
     <aside class="side">
       <section class="panel" aria-labelledby="prizeTitle">
-        <h2 id="prizeTitle">獎項庫存</h2>
+        <h2 id="prizeTitle">已抽出數量</h2>
         <ul class="prizes" id="prizeList"></ul>
       </section>
 
@@ -542,7 +603,7 @@
       { name: "超商禮物卡 50元", count: 60, color: "#d8a521" },
       { name: "職探任意門 紗網零錢包", count: 60, color: "#147c7d" },
       { name: "技職永續破風者 手機吊繩", count: 240, color: "#4f7d3f" },
-      { name: "銘謝惠顧", count: 400, color: "#627084" }
+      { name: "銘謝惠顧", count: 200, color: "#627084" }
     ];
 
     const CONFIG_STORAGE_KEY = "lotteryPrizeConfig";
@@ -657,13 +718,16 @@
       drawBtn.disabled = state.drawing || total === 0;
       drawBtn.textContent = total === 0 ? "已抽完" : state.drawing ? "抽獎中" : "開始抽獎";
 
-      prizeList.innerHTML = state.prizes.map((prize) => `
-        <li class="prize">
-          <span class="dot" style="background:${prize.color}"></span>
-          <span class="name">【${prize.name}】</span>
-          <span class="stock">${prize.count} 份</span>
-        </li>
-      `).join("");
+      prizeList.innerHTML = state.prizes.map((prize) => {
+        const drawnCount = state.history.filter((item) => item.name === prize.name).length;
+        return `
+          <li class="prize">
+            <span class="dot" style="background:${prize.color}"></span>
+            <span class="name">【${prize.name}】</span>
+            <span class="stock">${drawnCount} 份</span>
+          </li>
+        `;
+      }).join("");
 
       history.innerHTML = state.history.length
         ? state.history.map((item, index) => `
@@ -774,4 +838,5 @@
     render();
   </script>
 </body>
+
 </html>
