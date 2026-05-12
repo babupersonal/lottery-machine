@@ -366,7 +366,7 @@
 
     .tools {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
@@ -582,7 +582,6 @@
       </section>
 
       <div class="tools">
-        <button class="tool" id="resetBtn" type="button">重置抽獎</button>
         <a class="tool" href="admin.html">管理後台</a>
         <button class="tool" id="exportBtn" type="button">下載紀錄</button>
       </div>
@@ -684,7 +683,6 @@
     const machine = document.querySelector("#machine");
     const display = document.querySelector("#display");
     const drawBtn = document.querySelector("#drawBtn");
-    const resetBtn = document.querySelector("#resetBtn");
     const exportBtn = document.querySelector("#exportBtn");
     const prizeList = document.querySelector("#prizeList");
     const history = document.querySelector("#history");
@@ -796,15 +794,6 @@
       }, 1700);
     }
 
-    function resetDraw() {
-      if (!confirm("確定要重置所有庫存與紀錄？")) return;
-      state.prizes = clonePrizes(configuredPrizes);
-      state.history = [];
-      display.textContent = "準備抽獎";
-      saveRuntimeState();
-      render();
-    }
-
     function exportHistory() {
       const rows = [["序號", "獎項", "時間"]];
       state.history.slice().reverse().forEach((item, index) => {
@@ -821,7 +810,6 @@
     }
 
     drawBtn.addEventListener("click", startDraw);
-    resetBtn.addEventListener("click", resetDraw);
     exportBtn.addEventListener("click", exportHistory);
     closePop.addEventListener("click", () => resultPop.classList.remove("show"));
     resultPop.addEventListener("click", (event) => {
