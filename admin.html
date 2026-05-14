@@ -243,8 +243,9 @@
     }
 
     .history-row {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 64px 1fr auto;
+      align-items: center;
       gap: 12px;
       padding: 10px 0;
       border-bottom: 1px solid rgba(27, 36, 48, .08);
@@ -254,6 +255,17 @@
 
     .history-row strong {
       color: var(--ink);
+    }
+
+    .void-draw {
+      min-width: 72px;
+      min-height: 36px;
+      border: 1px solid rgba(217, 75, 66, .28);
+      border-radius: 8px;
+      background: rgba(217, 75, 66, .08);
+      color: var(--red);
+      cursor: pointer;
+      font-weight: 900;
     }
 
     .toast {
@@ -304,6 +316,23 @@
       .stock-count {
         grid-column: 2;
         text-align: left;
+      }
+
+      .history-row {
+        grid-template-columns: 1fr auto;
+      }
+
+      .history-row span {
+        grid-column: 1;
+      }
+
+      .history-row strong {
+        grid-column: 1;
+      }
+
+      .void-draw {
+        grid-column: 2;
+        grid-row: 1 / span 2;
       }
     }
   </style>
@@ -357,6 +386,7 @@
       <div class="panel-head">
         <h2 id="historyTitle">抽獎紀錄</h2>
       </div>
+      <p class="hint">作廢單筆紀錄會把該獎項庫存加回 1，不會重置整場抽獎。</p>
       <div class="history" id="history"></div>
     </section>
   </main>
@@ -469,6 +499,7 @@
             <div class="history-row">
               <span>#${runtimeState.history.length - index}</span>
               <strong>【${item.name}】</strong>
+              <button class="void-draw" type="button" data-history-index="${index}">作廢</button>
             </div>
           `).join("")
         : `<div class="history-row"><span>尚無紀錄</span><strong></strong></div>`;
@@ -535,6 +566,22 @@
       showToast("紀錄已清空");
     }
 
+    function voidDraw(index) {
+      const item = runtimeState.history[index];
+      if (!item) return;
+      if (!confirm(`確定要作廢「${item.name}」這筆紀錄，並把庫存加回 1？`)) return;
+
+      const prize = runtimeState.prizes.find((currentPrize) => currentPrize.name === item.name);
+      if (prize) {
+        prize.count += 1;
+      }
+
+      runtimeState.history.splice(index, 1);
+      saveRuntimeState(runtimeState);
+      render();
+      showToast("已作廢並加回庫存");
+    }
+
     function restoreDefault() {
       if (!confirm("確定要恢復預設數量並清空紀錄？")) return;
       configuredPrizes = clonePrizes(defaultPrizes);
@@ -549,6 +596,11 @@
     }
 
     form.addEventListener("submit", saveAndReset);
+    history.addEventListener("click", (event) => {
+      const button = event.target.closest(".void-draw");
+      if (!button) return;
+      voidDraw(Number.parseInt(button.dataset.historyIndex, 10));
+    });
     clearHistoryBtn.addEventListener("click", clearHistory);
     restoreDefaultBtn.addEventListener("click", restoreDefault);
 
