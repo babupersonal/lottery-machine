@@ -351,8 +351,9 @@
     }
 
     .history-row {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      align-items: center;
       gap: 12px;
       padding: 7px 0;
       border-bottom: 1px solid rgba(27, 36, 48, .08);
@@ -362,6 +363,18 @@
 
     .history-row strong {
       color: var(--ink);
+    }
+
+    .void-draw {
+      min-width: 54px;
+      min-height: 30px;
+      border: 1px solid rgba(217, 75, 66, .28);
+      border-radius: 8px;
+      background: rgba(217, 75, 66, .08);
+      color: var(--red);
+      cursor: pointer;
+      font-size: .86rem;
+      font-weight: 900;
     }
 
     .tools {
@@ -503,6 +516,20 @@
 
       .tools {
         grid-template-columns: 1fr;
+      }
+
+      .history-row {
+        grid-template-columns: 1fr auto;
+      }
+
+      .history-row span,
+      .history-row strong {
+        grid-column: 1;
+      }
+
+      .void-draw {
+        grid-column: 2;
+        grid-row: 1 / span 2;
       }
 
     }
@@ -732,6 +759,7 @@
             <div class="history-row">
               <span>#${state.history.length - index}</span>
               <strong>【${item.name}】</strong>
+              <button class="void-draw" type="button" data-history-index="${index}">作廢</button>
             </div>
           `).join("")
         : `<div class="history-row"><span>尚無紀錄</span><strong></strong></div>`;
@@ -809,8 +837,28 @@
       URL.revokeObjectURL(url);
     }
 
+    function voidDraw(index) {
+      const item = state.history[index];
+      if (!item) return;
+      if (!confirm(`確定要作廢「${item.name}」這筆紀錄，並把庫存加回 1？`)) return;
+
+      const prize = state.prizes.find((currentPrize) => currentPrize.name === item.name);
+      if (prize) {
+        prize.count += 1;
+      }
+
+      state.history.splice(index, 1);
+      saveRuntimeState();
+      render();
+    }
+
     drawBtn.addEventListener("click", startDraw);
     exportBtn.addEventListener("click", exportHistory);
+    history.addEventListener("click", (event) => {
+      const button = event.target.closest(".void-draw");
+      if (!button) return;
+      voidDraw(Number.parseInt(button.dataset.historyIndex, 10));
+    });
     closePop.addEventListener("click", () => resultPop.classList.remove("show"));
     resultPop.addEventListener("click", (event) => {
       if (event.target === resultPop) resultPop.classList.remove("show");
