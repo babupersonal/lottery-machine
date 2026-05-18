@@ -173,7 +173,7 @@
 
     .actions {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 1fr;
+      grid-template-columns: 1.2fr 1fr;
       gap: 10px;
       margin-top: 22px;
     }
@@ -190,12 +190,6 @@
       background: linear-gradient(180deg, #1c8d86, #116c70);
       color: white;
       box-shadow: 0 14px 28px rgba(17, 108, 112, .22);
-    }
-
-    .clear {
-      background: #fff3d2;
-      color: var(--ink);
-      border: 1px solid rgba(27, 36, 48, .12);
     }
 
     .restore {
@@ -369,7 +363,6 @@
         <div class="fields" id="fields"></div>
         <div class="actions">
           <button class="save" type="submit">儲存並重置抽獎</button>
-          <button class="clear" id="clearHistoryBtn" type="button">清空紀錄</button>
           <button class="restore" id="restoreDefaultBtn" type="button">恢復預設數量</button>
         </div>
       </form>
@@ -412,7 +405,6 @@
     const runtimeTotal = document.querySelector("#runtimeTotal");
     const configTotal = document.querySelector("#configTotal");
     const historyTotal = document.querySelector("#historyTotal");
-    const clearHistoryBtn = document.querySelector("#clearHistoryBtn");
     const restoreDefaultBtn = document.querySelector("#restoreDefaultBtn");
     const toast = document.querySelector("#toast");
 
@@ -558,14 +550,6 @@
       showToast("已儲存並重置");
     }
 
-    function clearHistory() {
-      if (!confirm("確定要清空抽獎紀錄？目前剩餘數量不會改變。")) return;
-      runtimeState.history = [];
-      saveRuntimeState(runtimeState);
-      render();
-      showToast("紀錄已清空");
-    }
-
     function voidDraw(index) {
       const item = runtimeState.history[index];
       if (!item) return;
@@ -601,7 +585,6 @@
       if (!button) return;
       voidDraw(Number.parseInt(button.dataset.historyIndex, 10));
     });
-    clearHistoryBtn.addEventListener("click", clearHistory);
     restoreDefaultBtn.addEventListener("click", restoreDefault);
 
     render();
