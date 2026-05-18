@@ -650,6 +650,17 @@
       });
     }
 
+    function clampRuntimePrizes(prizes, configuredPrizes) {
+      return configuredPrizes.map((configuredPrize, index) => {
+        const runtimePrize = prizes[index] || {};
+        const count = Number.parseInt(runtimePrize.count, 10);
+        return {
+          ...configuredPrize,
+          count: Math.min(Number.isFinite(count) && count >= 0 ? count : configuredPrize.count, configuredPrize.count)
+        };
+      });
+    }
+
     function loadConfiguredPrizes() {
       try {
         const saved = JSON.parse(localStorage.getItem(CONFIG_STORAGE_KEY));
@@ -676,7 +687,7 @@
 
         if (namesMatch) {
           return {
-            prizes: normalizePrizes(saved.prizes),
+            prizes: clampRuntimePrizes(saved.prizes, configuredPrizes),
             history: Array.isArray(saved.history) ? saved.history : []
           };
         }
@@ -720,6 +731,10 @@
 
     function getTotalLeft() {
       return state.prizes.reduce((sum, prize) => sum + prize.count, 0);
+    }
+
+    function getConfiguredCount(prizeName) {
+      return configuredPrizes.find((prize) => prize.name === prizeName)?.count ?? 0;
     }
 
     function drawPrize() {
@@ -844,7 +859,7 @@
 
       const prize = state.prizes.find((currentPrize) => currentPrize.name === item.name);
       if (prize) {
-        prize.count += 1;
+        prize.count = Math.min(prize.count + 1, getConfiguredCount(item.name));
       }
 
       state.history.splice(index, 1);
